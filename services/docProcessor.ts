@@ -39,8 +39,29 @@ export const parseDocument = async (file: File): Promise<string> => {
     });
 };
 
+const formatChapterTitle = (title: string): string => {
+    // This function formats the chapter title to a consistent "Sentence case".
+    // e.g., "CAPÍTULO 1: LA GRAN AVENTURA" becomes "Capítulo 1: La gran aventura".
+    // This provides a professional and consistent look, though it doesn't preserve
+    // capitalization for proper nouns within the subtitle.
+    const titleParts = title.split(':');
+    const mainPart = titleParts[0].trim();
+    
+    const formattedMainPart = mainPart.charAt(0).toUpperCase() + mainPart.slice(1).toLowerCase();
+
+    if (titleParts.length > 1) {
+        const subtitlePart = titleParts.slice(1).join(':').trim();
+        const formattedSubtitlePart = subtitlePart.charAt(0).toUpperCase() + subtitlePart.slice(1).toLowerCase();
+        return `${formattedMainPart}: ${formattedSubtitlePart}`;
+    }
+
+    return formattedMainPart;
+};
+
+
 export const splitIntoChapters = (text: string): Chapter[] => {
-    const chapterRegex = /(Cap[íi]tulo\s+\d+|Chapter\s+\d+)/gi;
+    // This regex captures the entire line starting with "Capítulo" or "Chapter" as the title.
+    const chapterRegex = /^(Cap[íi]tulo\s+\d+.*|Chapter\s+\d+.*)/gim;
     const parts = text.split(chapterRegex);
 
     if (parts.length <= 1) {
@@ -55,16 +76,15 @@ export const splitIntoChapters = (text: string): Chapter[] => {
     }
     
     const chapters: Chapter[] = [];
-    // The split results in an array like: [content_before_first_chapter, chapter_1_title, chapter_1_content, chapter_2_title, chapter_2_content, ...]
-    // We iterate through this structure to form chapter objects.
+    // The split results in an array like: [content_before_first_chapter, chapter_1_title, chapter_1_content, ...]
     for (let i = 1; i < parts.length; i += 2) {
-        const title = parts[i].trim();
+        const rawTitle = parts[i].trim();
         const content = parts[i + 1] ? parts[i + 1].trim() : '';
 
-        if (title && content) {
+        if (rawTitle && content) {
             chapters.push({
                 id: `chapter_${i}`,
-                title: title,
+                title: formatChapterTitle(rawTitle),
                 originalContent: content,
                 correctedContent: '',
                 status: ChapterStatus.PENDING
