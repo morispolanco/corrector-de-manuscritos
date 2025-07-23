@@ -1,10 +1,8 @@
-
 import { Chapter, ChapterStatus } from '../types';
+import { Document, Packer, Paragraph, HeadingLevel, TextRun } from 'docx';
 
 // This function will be called in the browser, where 'mammoth' is available globally from the script tag
 declare const mammoth: any;
-// This function will be called in the browser, where 'docx' is available globally from the script tag
-declare const docx: any;
 
 export const parseDocument = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -94,17 +92,23 @@ export const splitIntoChapters = (text: string): Chapter[] => {
     return chapters;
 };
 
-export const exportToDocx = (chapters: { title: string; content: string }[], fileName: string) => {
-    const { Document, Packer, Paragraph, HeadingLevel, TextRun } = docx;
+const sanitizeTextForDocx = (text: string): string => {
+    if (!text) return '';
+    // OpenXML spec doesn't allow most control characters.
+    // This regex removes control characters but keeps tab, newline, and carriage return.
+    // eslint-disable-next-line no-control-regex
+    return text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+};
 
+export const exportToDocx = (chapters: { title: string; content: string }[], fileName: string) => {
     const docChildren = chapters.flatMap(chapter => {
         const title = new Paragraph({
-            text: chapter.title,
+            children: [new TextRun(sanitizeTextForDocx(chapter.title))],
             heading: HeadingLevel.HEADING_1,
             spacing: { after: 200 },
         });
 
-        const contentParagraphs = chapter.content.split('\n').filter(p => p.trim() !== '').map(paragraphText =>
+        const contentParagraphs = sanitizeTextForDocx(chapter.content).split('\n').filter(p => p.trim() !== '').map(paragraphText =>
             new Paragraph({
                 children: [new TextRun(paragraphText)],
                 spacing: { after: 150 },
@@ -131,5 +135,8 @@ export const exportToDocx = (chapters: { title: string; content: string }[], fil
         a.click();
         window.URL.revokeObjectURL(url);
         a.remove();
+    }).catch(error => {
+        console.error("Error exporting to .docx file:", error);
+        alert("Ocurrió un error al crear el archivo .docx. Por favor, revisa la consola del navegador para más detalles.");
     });
 };
