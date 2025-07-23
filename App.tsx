@@ -69,6 +69,7 @@ const App: React.FC = () => {
     };
     
     const allChaptersDone = useMemo(() => chapters.length > 0 && chapters.every(ch => ch.status === ChapterStatus.DONE), [chapters]);
+    const anyChapterDone = useMemo(() => chapters.length > 0 && chapters.some(ch => ch.status === ChapterStatus.DONE), [chapters]);
 
     const renderContent = () => {
         switch (appState) {
@@ -118,15 +119,16 @@ const App: React.FC = () => {
                 {appState === AppState.REVIEWING && (
                     <button
                         onClick={handleExport}
-                        disabled={!allChaptersDone}
                         className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-md transition-all duration-300 ${
                             allChaptersDone
                                 ? 'bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-600/20'
-                                : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                                : anyChapterDone
+                                ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-600/20'
+                                : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
                         }`}
                     >
                         <ExportIcon />
-                        Exportar .docx
+                        {allChaptersDone ? "Exportar .docx" : (anyChapterDone ? "Exportar Parcialmente" : "Exportar Original")}
                     </button>
                 )}
             </header>

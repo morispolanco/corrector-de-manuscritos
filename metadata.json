@@ -1,5 +1,6 @@
 {
   "name": "Corrector de Manuscritos IA",
   "description": "Una aplicación para importar documentos, corregir la gramática y la ortografía capítulo por capítulo con IA, y exportar el resultado final como un archivo .docx.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "prompt": ""
 }
