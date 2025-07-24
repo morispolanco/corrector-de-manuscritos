@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 if (!process.env.API_KEY) {
@@ -11,6 +10,8 @@ const CORRECTION_PROMPT = `
 Eres un editor profesional y corrector de estilo. Tu tarea es realizar una corrección técnica del siguiente texto.
 - Corrige únicamente errores gramaticales, de ortografía y de puntuación.
 - Para los diálogos, utiliza siempre la raya o guion largo (—) en lugar del guion corto (-).
+- Formatea el texto en párrafos regulares, eliminando saltos de línea innecesarios o espacios extra entre párrafos.
+- Elimina cualquier número de página que pueda aparecer en el texto.
 - NO alteres el estilo, la estructura de las frases ni la elección de palabras a menos que sea gramaticalmente incorrecto.
 - Mantén la voz y el tono originales del autor sin cambios.
 Devuelve únicamente el texto corregido, sin ningún comentario, explicación o preámbulo.
